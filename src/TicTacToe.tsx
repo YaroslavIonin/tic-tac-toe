@@ -1,7 +1,8 @@
-import React, {useState, useEffect, JSX} from "react";
+import React, {useState, JSX} from "react";
 import "./TicTacToe.css";
 
 type Player = "X" | "O";
+type WinnerState = Player | "Draw" | null;
 
 function Square({value, onClick}: { value: Player | null; onClick: () => void }) {
     return (
@@ -14,38 +15,28 @@ function Square({value, onClick}: { value: Player | null; onClick: () => void })
 export default function TicTacToe(): JSX.Element {
     const [board, setBoard] = useState<Array<Player | null>>(Array(9).fill(null));
     const [current, setCurrent] = useState<Player>("X");
-    const [winner, setWinner] = useState<Player | "Draw" | null>(null);
-    const [history, setHistory] = useState<{ move: number; player: Player }[]>([]);
+    const [winner, setWinner] = useState<WinnerState>(null);
 
     function handleClick(i: number) {
         if (winner || board[i]) return;
-        const newBoard = board.slice();
+
+        const newBoard = [...board];
         newBoard[i] = current;
-        setHistory([...history, {move: i, player: current}]);
         setBoard(newBoard);
 
         const w = calculateWinner(newBoard);
-        if (w) setWinner(w);
-        else if (newBoard.every((c) => c !== null)) setWinner("Draw");
-
-        setCurrent(current === "X" ? "O" : "X");
+        if (w) {
+            setWinner(w);
+        } else if (newBoard.every((c) => c !== null)) {
+            setWinner("Draw");
+        } else {
+            setCurrent(current === "X" ? "O" : "X");
+        }
     }
 
     function reset() {
         setBoard(Array(9).fill(null));
         setCurrent("X");
-        setWinner(null);
-        setHistory([]);
-    }
-
-    function undo() {
-        if (history.length === 0) return;
-        const last = history[history.length - 1];
-        const newBoard = board.slice();
-        newBoard[last.move] = null;
-        setBoard(newBoard);
-        setHistory(history.slice(0, -1));
-        setCurrent(last.player);
         setWinner(null);
     }
 
@@ -70,7 +61,6 @@ export default function TicTacToe(): JSX.Element {
                 )}
 
                 <div className="buttons">
-                    <button onClick={undo}>Отменить ход</button>
                     <button onClick={reset}>Сброс</button>
                 </div>
 
