@@ -3,6 +3,14 @@ import "./TicTacToe.css";
 
 type Player = "X" | "O";
 
+function Square({value, onClick}: { value: Player | null; onClick: () => void }) {
+    return (
+        <button className="cell" onClick={onClick}>
+            {value}
+        </button>
+    );
+}
+
 export default function TicTacToe(): JSX.Element {
     const [board, setBoard] = useState<Array<Player | null>>(Array(9).fill(null));
     const [current, setCurrent] = useState<Player>("X");
@@ -47,9 +55,11 @@ export default function TicTacToe(): JSX.Element {
             <h1>Крестики-нолики</h1>
             <div className="board">
                 {board.map((value, i) => (
-                    <button key={i} onClick={() => handleClick(i)} className="cell">
-                        {value}
-                    </button>
+                    <Square
+                        key={`cell-${i}`}
+                        value={value}
+                        onClick={() => handleClick(i)}
+                    />
                 ))}
             </div>
 
