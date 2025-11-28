@@ -4,9 +4,15 @@ import "./TicTacToe.css";
 type Player = "X" | "O";
 type WinnerState = Player | "Draw" | null;
 
-function Square({value, onClick}: { value: Player | null; onClick: () => void }) {
+interface SquareProps {
+    value: Player | null;
+    onClick: () => void;
+    highlight?: boolean;
+}
+
+function Square({value, onClick, highlight}: SquareProps) {
     return (
-        <button className="cell" onClick={onClick}>
+        <button className={`cell ${highlight ? "highlight" : ""}`} onClick={onClick}>
             {value}
         </button>
     );
@@ -16,6 +22,7 @@ export default function TicTacToe(): JSX.Element {
     const [board, setBoard] = useState<Array<Player | null>>(Array(9).fill(null));
     const [current, setCurrent] = useState<Player>("X");
     const [winner, setWinner] = useState<WinnerState>(null);
+    const [winningLine, setWinningLine] = useState<number[] | null>(null);
 
     function handleClick(i: number) {
         if (winner || board[i]) return;
@@ -24,11 +31,14 @@ export default function TicTacToe(): JSX.Element {
         newBoard[i] = current;
         setBoard(newBoard);
 
-        const w = calculateWinner(newBoard);
-        if (w) {
-            setWinner(w);
+        const result = calculateWinner(newBoard);
+        if (result) {
+            setWinner(result.winner);
+            setWinningLine(result.line);
         } else if (newBoard.every((c) => c !== null)) {
             setWinner("Draw");
+            setWinningLine(null);
+            setWinningLine(null);
         } else {
             setCurrent(current === "X" ? "O" : "X");
         }
@@ -38,6 +48,7 @@ export default function TicTacToe(): JSX.Element {
         setBoard(Array(9).fill(null));
         setCurrent("X");
         setWinner(null);
+        setWinningLine(null);
     }
 
     return (
@@ -49,6 +60,7 @@ export default function TicTacToe(): JSX.Element {
                         key={`cell-${i}`}
                         value={value}
                         onClick={() => handleClick(i)}
+                        highlight={winningLine?.includes(i)}
                     />
                 ))}
             </div>
@@ -69,7 +81,7 @@ export default function TicTacToe(): JSX.Element {
     );
 }
 
-function calculateWinner(squares: Array<Player | null>): Player | null {
+function calculateWinner(squares: Array<Player | null>): { winner: "X" | "O" | null; line: number[] } | null {
     const lines = [
         [0, 1, 2],
         [3, 4, 5],
@@ -82,7 +94,7 @@ function calculateWinner(squares: Array<Player | null>): Player | null {
     ];
     for (let [a, b, c] of lines) {
         if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-            return squares[a];
+            return {winner: squares[a], line: [a, b, c]};
         }
     }
     return null;
