@@ -17,18 +17,17 @@ export default function TicTacToe(): JSX.Element {
     const [winner, setWinner] = useState<Player | "Draw" | null>(null);
     const [history, setHistory] = useState<{ move: number; player: Player }[]>([]);
 
-    useEffect(() => {
-        const w = calculateWinner(board);
-        if (w) setWinner(w);
-        else if (board.every((c) => c !== null)) setWinner("Draw");
-    }, [board]);
-
     function handleClick(i: number) {
         if (winner || board[i]) return;
         const newBoard = board.slice();
         newBoard[i] = current;
         setHistory([...history, {move: i, player: current}]);
         setBoard(newBoard);
+
+        const w = calculateWinner(newBoard);
+        if (w) setWinner(w);
+        else if (newBoard.every((c) => c !== null)) setWinner("Draw");
+
         setCurrent(current === "X" ? "O" : "X");
     }
 
